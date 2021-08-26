@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"image/png"
 	"math"
 )
 
@@ -105,6 +106,16 @@ func (plt *Plot) RenderAscii() string {
 	fmt.Fprintln(buf)
 
 	return buf.String()
+}
+
+func (plt *Plot) RenderPng() []byte {
+	var buf bytes.Buffer
+	enc := png.Encoder{CompressionLevel: png.BestSpeed}
+	err := enc.Encode(&buf, plt.RenderImage())
+	if err != nil {
+		panic(err)
+	}
+	return buf.Bytes()
 }
 
 func minmax(xs []float64) (min float64, max float64) {
