@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 read a file and try to display it as an image
 in the terminal (iTerm2 or mintty)
