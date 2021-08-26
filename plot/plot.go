@@ -21,6 +21,10 @@ type Plot struct {
 	Dots      bool
 }
 
+func Id(x float64) float64 {
+	return x
+}
+
 func PlotFunc(x []float64, f, g FuncF64, W, H int) *Plot {
 	N := len(x)
 
@@ -31,17 +35,17 @@ func PlotFunc(x []float64, f, g FuncF64, W, H int) *Plot {
 	j := 0
 	t := 0.0
 	for _, xn := range x {
-		t += f(xn)
+		t += g(xn)
 		j++
 		if j == M {
-			y[i] = g(t / float64(M))
+			y[i] = f(t / float64(M))
 			i++
 			j = 0
 			t = 0.0
 		}
 	}
 	if j > 0 {
-		y[i] = g(t / float64(j))
+		y[i] = f(t / float64(j))
 	}
 	actualW := i
 

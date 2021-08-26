@@ -1,4 +1,4 @@
-package plot
+package iTerm2
 
 import (
 	"encoding/base64"

@@ -1,4 +1,4 @@
-package plot
+package kitty
 
 import (
 	"encoding/base64"
