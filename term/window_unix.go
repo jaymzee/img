@@ -1,3 +1,5 @@
+// +build linux darwin freebsd
+
 package term
 
 import (
@@ -5,11 +7,10 @@ import (
 	"os"
 )
 
-func GetWinsize() (*Winsize, error) {
+func GetWinsize() *Winsize {
 	ws, err := unix.IoctlGetWinsize(int(os.Stdout.Fd()), unix.TIOCGWINSZ)
 	if err != nil {
-		return nil, os.NewSyscallError("GetWinsize", err)
+		return newWinsize()
 	}
-
-	return &Winsize{ws.Row, ws.Col, ws.Xpixel, ws.Ypixel}, nil
+	return &Winsize{ws.Row, ws.Col, ws.Xpixel, ws.Ypixel}
 }
