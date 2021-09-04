@@ -1,5 +1,6 @@
 package term
 
+// Winsize is the console window size
 type Winsize struct {
 	Rows uint16
 	Cols uint16

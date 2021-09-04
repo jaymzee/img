@@ -2,6 +2,7 @@ package term
 
 import "golang.org/x/sys/windows"
 
+// GetWinsize returns the console window size.
 func GetWinsize() *Winsize {
 	// fetch window size from Windows API
 	var csbi windows.ConsoleScreenBufferInfo
@@ -9,7 +10,10 @@ func GetWinsize() *Winsize {
 	if err != nil {
 		panic(err)
 	}
-	windows.GetConsoleScreenBufferInfo(h, &csbi)
+	err = windows.GetConsoleScreenBufferInfo(h, &csbi)
+	if err != nil {
+		panic(err)
+	}
 	cols := csbi.Window.Right - csbi.Window.Left + 1
 	rows := csbi.Window.Bottom - csbi.Window.Top + 1
 
@@ -23,7 +27,6 @@ func GetWinsize() *Winsize {
 func max(a int16, b int16) int16 {
 	if a > b {
 		return a
-	} else {
-		return b
 	}
+	return b
 }

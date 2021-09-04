@@ -1,3 +1,6 @@
+// Package kitty is for transfering graphics data to the Kitty terminal
+// using the Terminal Graphics Protocol described at
+// https://sw.kovidgoyal.net/kitty/graphics-protocol/.
 package kitty
 
 import (
@@ -5,16 +8,28 @@ import (
 	"io"
 )
 
-func serializeGfxCmd(cmd, payload []byte) []byte {
-	img := make([]byte, 0, len(cmd)+len(payload)+6)
-	img = append(append(img, '\x1b', '_', 'G'), cmd...)
-	if len(payload) > 0 {
-		img = append(append(img, ';'), payload...)
-	}
-	return append(img, '\x1b', '\\')
+// WriteImage transfers graphics image data to the Kitty terminal.
+// It accepts a png image or an RGBA byte array or any other format supported
+// by the protocol described in the link above. The data is base64 encoded and
+// written to the writer along with the kitty cmd string containing a comma
+// separated list of key=value pairs.
+//   infile, err := os.Open("cat.png")
+//   img := image.Decode(infile)
+//   kitty.WriteImage(os.Stdout, "a=T,f=100", img)
+func WriteImage(w io.Writer, cmd string, data []byte) error {
+	enc := base64.StdEncoding
+	encoded := make([]byte, enc.EncodedLen(len(data)))
+	enc.Encode(encoded, data)
+	return WriteBase64(w, cmd, encoded)
 }
 
-func writeChunked(w io.Writer, cmd string, data []byte) {
+// WriteBase64 transfers graphics image data to the Kitty terminal.
+// It accepts a png image or an RGBA byte array or any other format supported
+// by the terminal graphics protocol. The data must be base64 encoded
+// and is broken into chunks <= 4kB and written to the writer in terminal
+// Application Programming Commands (APC). The first chunk will contain the
+// kitty cmd string, a comma separated list of key=value pairs.
+func WriteBase64(w io.Writer, cmd string, data []byte) error {
 	var chunk []byte
 	for len(data) > 0 {
 		next := min(4096, len(data))
@@ -24,21 +39,27 @@ func writeChunked(w io.Writer, cmd string, data []byte) {
 		} else {
 			cmd += ",m=0"
 		}
-		w.Write(serializeGfxCmd([]byte(cmd), chunk))
+		_, err := w.Write(serializeGfxCmd([]byte(cmd), chunk))
+		if err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func WriteImage(w io.Writer, head string, data []byte) {
-	enc := base64.StdEncoding
-	encoded := make([]byte, enc.EncodedLen(len(data)))
-	enc.Encode(encoded, data)
-	writeChunked(w, head, encoded)
+// serializeGfxCmd returns an APC containing the chunk
+func serializeGfxCmd(cmd, payload []byte) []byte {
+	img := make([]byte, 0, len(cmd)+len(payload)+6)
+	img = append(append(img, '\x1b', '_', 'G'), cmd...)
+	if len(payload) > 0 {
+		img = append(append(img, ';'), payload...)
+	}
+	return append(img, '\x1b', '\\')
 }
 
 func min(a, b int) int {
 	if a < b {
 		return a
-	} else {
-		return b
 	}
+	return b
 }
