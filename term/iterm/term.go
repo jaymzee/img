@@ -13,7 +13,7 @@ import (
 // a semicolon seperated list of key=value pairs
 //   infile, err := os.Open("cat.png")
 //   img := image.Decode(infile)
-//   kitty.WriteImage(os.Stdout, "inline=1", img)
+//   iterm.WriteImage(os.Stdout, "inline=1", img)
 func WriteImage(w io.Writer, args string, data []byte) error {
 	size := len(data)
 	enc := base64.StdEncoding
