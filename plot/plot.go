@@ -30,9 +30,9 @@ func ID(x float64) float64 {
 	return x
 }
 
-// GoF plots g∘f(x) or g(f(x)) where f(x) is the accumulation of f
-// applied to the x's for that pixel of the plot.
-func GoF(x []float64, g, f FuncF64, width, height int) *Plot {
+// Compose plots g(/f(x)) where /f(x) is the mean of f(x) values
+// for that pixel of the plot.
+func Compose(g, f FuncF64, x []float64, width, height int) *Plot {
 	N := len(x)
 
 	// resample to fit screen
