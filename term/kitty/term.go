@@ -2,7 +2,7 @@ package kitty
 
 import (
 	"encoding/base64"
-	"os"
+	"io"
 )
 
 func serializeGfxCmd(cmd, payload []byte) []byte {
@@ -14,7 +14,7 @@ func serializeGfxCmd(cmd, payload []byte) []byte {
 	return append(img, '\x1b', '\\')
 }
 
-func writeChunked(cmd string, data []byte) {
+func writeChunked(w io.Writer, cmd string, data []byte) {
 	var chunk []byte
 	for len(data) > 0 {
 		next := min(4096, len(data))
@@ -24,15 +24,15 @@ func writeChunked(cmd string, data []byte) {
 		} else {
 			cmd += ",m=0"
 		}
-		os.Stdout.Write(serializeGfxCmd([]byte(cmd), chunk))
+		w.Write(serializeGfxCmd([]byte(cmd), chunk))
 	}
 }
 
-func WriteImage(head string, data []byte) {
+func WriteImage(w io.Writer, head string, data []byte) {
 	enc := base64.StdEncoding
 	encoded := make([]byte, enc.EncodedLen(len(data)))
 	enc.Encode(encoded, data)
-	writeChunked(head, encoded)
+	writeChunked(w, head, encoded)
 }
 
 func min(a, b int) int {

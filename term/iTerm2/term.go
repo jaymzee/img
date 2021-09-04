@@ -3,17 +3,20 @@ package iTerm2
 import (
 	"encoding/base64"
 	"fmt"
-	"os"
+	"io"
 )
 
-func WriteImage(data []byte) {
+func WriteImage(w io.Writer, args string, data []byte) {
 	size := len(data)
-	head := fmt.Sprintf("\033]1337;File=size=%v;inline=1:", size)
 	enc := base64.StdEncoding
 	encoded := make([]byte, enc.EncodedLen(size))
 	enc.Encode(encoded, data)
 
-	os.Stdout.WriteString(head)
-	os.Stdout.Write(encoded)
-	os.Stdout.WriteString("\x07")
+	fmt.Fprintf(w, "\033]1337;File=size=%d", size)
+	if len(args) > 0 {
+		fmt.Fprintf(w, ";%s", args)
+	}
+	io.WriteString(w, ":")
+	w.Write(encoded)
+	io.WriteString(w, "\x07")
 }
