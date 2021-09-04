@@ -61,12 +61,17 @@ IPython magic (works both in terminal and notebook)
 ```
 
 ## img Go Package
-
 package        | description
-_______________|_____________ 
+---------------|-------------------------
 img/plot       | simple plotting
 img/term/iterm | iTerm2 Terminal Graphics
 img/term/kitty | Kitty Terminal Graphics
+
+```go
+infile, err := os.Open("cat.png")
+img := image.Decode(infile)
+iterm.WriteImage(os.Stdout, "inline=1", img)
+```
 
 ## ImageMagick
 resize images with:
