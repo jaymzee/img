@@ -60,6 +60,14 @@ IPython magic (works both in terminal and notebook)
 %imgcat skimage.data.chelsea()
 ```
 
+## img Go Package
+
+package        | description
+_______________|_____________ 
+img/plot       | simple plotting
+img/term/iterm | iTerm2 Terminal Graphics
+img/term/kitty | Kitty Terminal Graphics
+
 ## ImageMagick
 resize images with:
 ```
