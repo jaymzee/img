@@ -26,7 +26,7 @@ func WriteImage(w io.Writer, cmd string, data []byte) error {
 // WriteBase64 transfers graphics image data to the Kitty terminal.
 // It accepts a png image or an RGBA byte array or any other format supported
 // by the terminal graphics protocol. The data must be base64 encoded
-// and is broken into chunks <= 4kB and written to the writer in terminal
+// and is broken into chunks <= 4K and written to the writer in terminal
 // Application Programming Commands (APC). The first chunk will contain the
 // kitty cmd string, a comma separated list of key=value pairs.
 func WriteBase64(w io.Writer, cmd string, data []byte) error {
