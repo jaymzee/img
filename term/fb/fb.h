@@ -8,7 +8,9 @@ struct fbinfo {
 struct image {
     int xres;
     int yres;
-    int length;
+    char *pix;
 };
 
-int write_image(struct image *img, struct fbinfo *fbinfo, char *imgdata);
+int write_image(struct image *img, int x, int y, struct fbinfo *fbinfo);
+struct image *
+new_image(int xres, int yres);

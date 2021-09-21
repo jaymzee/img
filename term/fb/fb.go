@@ -7,15 +7,15 @@ import "C"
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 	"github.com/jaymzee/img/term"
 	"image"
+	"image/color"
 	"image/png"
 	"unsafe"
 )
 
-// WriteImageToFramebuffer takes a png image and Writes the raw RGBA pixel
+// WriteImage takes a png image and Writes the raw RGBA pixel
 // data to the device named. Only Paletted RGBA PNG images are supported.
 func WriteImage(device string, data []byte) error {
 	// get screen dimensions, bit depth, text cell size, framebuffer padding
@@ -39,16 +39,24 @@ func WriteImage(device string, data []byte) error {
 	}
 
 	// write image data to buffer
-	var buf bytes.Buffer
+	dx := img.Bounds().Dx()
+	dy := img.Bounds().Dy()
+	cimg := C.new_image(C.int(dx), C.int(dy))
+	//buf := (*C.char)(C.malloc(C.ulong(dx * dy * 4)))
 	if img, ok := img.(*image.Paletted); ok {
-		bounds := img.Bounds()
-		offset := 0
-		for i := 0; i < bounds.Dy(); i++ {
-			for j := 0; j < bounds.Dx(); j++ {
-				colorindx := img.Pix[offset]
-				rgba := img.Palette[colorindx]
-				binary.Write(&buf, binary.LittleEndian, rgba)
-				offset++
+		n := 0
+		pix := (*[1<<24]C.char)(unsafe.Pointer(cimg.pix))
+		for i := 0; i < dy; i++ {
+			for j := 0; j < dx; j++ {
+				indx := img.Pix[i*dx + j]
+				if rgba, ok := img.Palette[indx].(color.RGBA); ok {
+					pix[n+0] = (C.char)(rgba.B)
+					pix[n+1] = (C.char)(rgba.G)
+					pix[n+2] = (C.char)(rgba.R)
+					n += 4
+				} else {
+					return fmt.Errorf("expected color in RGBA format")
+				}
 			}
 		}
 	} else {
@@ -56,17 +64,13 @@ func WriteImage(device string, data []byte) error {
 	}
 
 	// write buffer to framebuffer
-	var fbinfo C.struct_fbinfo
-	var imginfo C.struct_image
-	fbinfo.xres = C.int(scrinfo.Xres)
-	fbinfo.yres = C.int(scrinfo.Yres)
-	fbinfo.pad = C.int(pad)
-	fbinfo.device = C.CString("/dev/fb0")
-	imginfo.xres = C.int(img.Bounds().Dx())
-	imginfo.yres = C.int(img.Bounds().Dy())
-	imgdata := buf.Bytes()
-	imginfo.length = C.int(len(imgdata))
-	if C.write_image(&imginfo, &fbinfo, (*C.char)(unsafe.Pointer(&imgdata[0]))) == 0 {
+	fbinfo := C.struct_fbinfo {
+		xres: C.int(scrinfo.Xres),
+		yres: C.int(scrinfo.Yres),
+		pad: C.int(pad),
+		device: C.CString("/dev/fb0"),
+	}
+	if C.write_image(cimg, 0, 10, &fbinfo) == 0 {
 		return fmt.Errorf("failed to write data to framebuffer")
 	}
 	return nil
