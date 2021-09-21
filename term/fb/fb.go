@@ -28,6 +28,7 @@ type ScreenInfo struct {
 func WriteImage(device string, data []byte) error {
 	// get screen dimensions, bit depth, text cell size, framebuffer padding
 	winsize := term.GetWinsize()
+	cellwidth := int(winsize.Xres / winsize.Cols)
 	cellheight := int(winsize.Yres / winsize.Rows)
 	_, cur_y, err := term.GetCursorCoord()
 	if err != nil {
@@ -86,7 +87,7 @@ func WriteImage(device string, data []byte) error {
 	for i := 0; i < dy / cellheight + 1; i++ {
 		fmt.Println();
 	}
-	if C.write_image(cimg, 0, C.int(cur_y * cellheight), &fbinfo) != 0 {
+	if C.write_image(cimg, C.int(6 * cellwidth), C.int(cur_y * cellheight), &fbinfo) != 0 {
 		return fmt.Errorf("%s: write to framebuffer failed", device)
 	}
 	return nil
