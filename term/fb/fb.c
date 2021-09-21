@@ -29,24 +29,30 @@ int write_image(struct image *img, int x, int y, struct fbinfo *fbinfo)
         return -1;
     }
 
+    long pagesize = sysconf(_SC_PAGE_SIZE);
+    int desired_offset = (y * (fbinfo->xres + fbinfo->pad) + x) << 2;
+    int pages = desired_offset / pagesize;
+    off_t offset = pages * pagesize;
+    int delta = (desired_offset - offset) >> 2;
+    int size = (fbinfo->xres + fbinfo->pad) * fbinfo->yres + delta;
+
     //get writable screen memory; 32bit color
-    uint32_t *fb = mmap(NULL, fbinfo->xres * fbinfo->yres,
-                        PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    uint32_t *fb = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, offset);
     if (fb < 0) {
+        close(fd);
         return -1;
     }
 
     int stride = fbinfo->xres + fbinfo->pad;
 
     int32_t *pixels = (void *)img->pix;
-    int n = 0;
     for (int i = 0; i < img->yres; i++) {
         for (int j = 0; j < img->xres; j++) {
-            fb[(y+i)*stride + j + x] = pixels[n++];
+            fb[i*stride + j + x + delta] = *pixels++;
         }
     }
 
+    munmap(fb, size);
     close(fd);
-
     return 0;
 }
