@@ -64,6 +64,7 @@ IPython magic (works both in terminal and notebook)
 package        | description
 ---------------|-------------------------
 img/plot       | simple plotting
+img/term/fb    | framebuffer (linux console)
 img/term/iterm | iTerm2 Terminal Graphics
 img/term/kitty | Kitty Terminal Graphics
 
