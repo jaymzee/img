@@ -2,7 +2,7 @@
 
 package term
 
-func QueryFramebuffer() *ScreenInfo {
+func QueryFramebuffer() (*ScreenInfo, error) {
 	var si ScreenInfo
-	return &si
+	return &si, nil
 }

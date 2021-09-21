@@ -6,11 +6,19 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+// return 0 on success
+// return -1 on failure
 int query_framebuffer(const char *device, struct fb_var_screeninfo *fbinfo) {
     int fd = open(device, O_RDWR);
     if (fd < 0) {
-        return 0;
+        return -1;
     }
-    ioctl(fd, FBIOGET_VSCREENINFO, fbinfo);
+
+    if (ioctl(fd, FBIOGET_VSCREENINFO, fbinfo) < 0) {
+        close(fd);
+        return -1;
+    }
+
     close(fd);
+    return 0;
 }

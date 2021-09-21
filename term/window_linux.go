@@ -14,10 +14,11 @@ func GetWinsize() *Winsize {
 	}
 
 	if Isaconsole() {
-		// TODO: check for permissions
-		si := QueryFramebuffer("/dev/fb0")
-		return &Winsize{ws.Row, ws.Col, uint16(si.Xres), uint16(si.Yres)}
-	} else {
-		return &Winsize{ws.Row, ws.Col, ws.Xpixel, ws.Ypixel}
+		si, err := QueryFramebuffer("/dev/fb0")
+		// fallback on error instead of fail
+		if err == nil {
+			return &Winsize{ws.Row, ws.Col, uint16(si.Xres), uint16(si.Yres)}
+		}
 	}
+	return &Winsize{ws.Row, ws.Col, ws.Xpixel, ws.Ypixel}
 }

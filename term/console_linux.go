@@ -4,10 +4,14 @@ package term
 // #cgo LDFLAGS:
 // #include "query_fb.h"
 import "C"
+import "fmt"
 
-func QueryFramebuffer(device string) *ScreenInfo {
+func QueryFramebuffer(device string) (*ScreenInfo, error) {
 	var fbinfo C.struct_fb_var_screeninfo
-	C.query_framebuffer(C.CString(device), &fbinfo)
+
+	if C.query_framebuffer(C.CString(device), &fbinfo) != 0 {
+		return nil, fmt.Errorf("%s: permission denied")
+	}
 
 	return &ScreenInfo{
 		Xres:  uint(fbinfo.xres),
@@ -15,5 +19,5 @@ func QueryFramebuffer(device string) *ScreenInfo {
 		Xresv: uint(fbinfo.xres_virtual),
 		Yresv: uint(fbinfo.yres_virtual),
 		Bpp:   uint(fbinfo.bits_per_pixel),
-	}
+	}, nil
 }
