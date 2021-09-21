@@ -1,5 +1,3 @@
-// +build darwin freebsd solaris
-
 package term
 
 import (
@@ -14,5 +12,12 @@ func GetWinsize() *Winsize {
 	if err != nil {
 		return newWinsize()
 	}
-	return &Winsize{ws.Row, ws.Col, ws.Xpixel, ws.Ypixel}
+
+	if Isaconsole() {
+		// TODO: check for permissions
+		si := QueryFramebuffer("/dev/fb0")
+		return &Winsize{ws.Row, ws.Col, uint16(si.Xres), uint16(si.Yres)}
+	} else {
+		return &Winsize{ws.Row, ws.Col, ws.Xpixel, ws.Ypixel}
+	}
 }

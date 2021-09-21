@@ -2,7 +2,7 @@ package term
 
 // #cgo CFLAGS:
 // #cgo LDFLAGS:
-// #include "fb.h"
+// #include "query_fb.h"
 import "C"
 
 func QueryFramebuffer(device string) *ScreenInfo {
