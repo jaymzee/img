@@ -1,4 +1,4 @@
-# Display Inline Images in the Terminal (iTerm2, Kitty, mintty)
+# Display Inline Images in the Terminal (iTerm2, mintty, Kitty, linux console)
 
 ## imgcat
 it works in iTerm2 and mintty
