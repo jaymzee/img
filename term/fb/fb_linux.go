@@ -1,12 +1,13 @@
-package term
+package fb
 
 // #cgo CFLAGS:
 // #cgo LDFLAGS:
-// #include "query_fb.h"
+// #include "fb_query.h"
 import "C"
 import "fmt"
 
-func QueryFramebuffer(device string) (*ScreenInfo, error) {
+// Query queries the framebuffer for it's screen dimensions and bits per pixel
+func Query(device string) (*ScreenInfo, error) {
 	var fbinfo C.struct_fb_var_screeninfo
 
 	if C.query_framebuffer(C.CString(device), &fbinfo) != 0 {

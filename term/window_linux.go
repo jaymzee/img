@@ -1,6 +1,11 @@
 package term
 
+// #cgo CFLAGS:
+// #cgo LDFLAGS:
+// #include "fb_query.h"
+import "C"
 import (
+	"fmt"
 	"golang.org/x/sys/unix"
 	"os"
 )
@@ -14,11 +19,23 @@ func GetWinsize() *Winsize {
 	}
 
 	if Isaconsole() {
-		si, err := QueryFramebuffer("/dev/fb0")
+		xres, yres, err := queryfb("/dev/fb0")
 		// fallback on error instead of fail
 		if err == nil {
-			return &Winsize{ws.Row, ws.Col, uint16(si.Xres), uint16(si.Yres)}
+			return &Winsize{ws.Row, ws.Col, xres, yres}
 		}
 	}
 	return &Winsize{ws.Row, ws.Col, ws.Xpixel, ws.Ypixel}
+}
+
+// copied from fb package because it avoids import cycles
+// query the framebuffer for it's screen dimensions and bits per pixel
+func queryfb(device string) (uint16, uint16, error) {
+	var fbinfo C.struct_fb_var_screeninfo
+
+	if C.query_fb(C.CString(device), &fbinfo) != 0 {
+		return 0, 0, fmt.Errorf("%s: permission denied")
+	}
+
+	return uint16(fbinfo.xres), uint16(fbinfo.yres), nil
 }

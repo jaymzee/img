@@ -10,16 +10,13 @@
 struct image *
 new_image(int xres, int yres)
 {
-    void *p = malloc(sizeof(struct image) + xres * yres * 4);
-    if (p == NULL) {
+    int pixlenbytes = xres * yres * 4; // RGBA format
+    struct image *img = malloc(sizeof(struct image) + pixlenbytes - PIX_DFLTLEN);
+    if (img == NULL) {
         return NULL;
     }
-
-    struct image *img = p;
-    img->pix = p + sizeof(struct image);
     img->xres = xres;
     img->yres = yres;
-
     return img;
 }
 

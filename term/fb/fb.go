@@ -15,14 +15,25 @@ import (
 	"unsafe"
 )
 
+type ScreenInfo struct {
+	Xres  uint
+	Yres  uint
+	Xresv uint
+	Yresv uint
+	Bpp   uint
+}
+
 // WriteImage takes a png image and Writes the raw RGBA pixel
 // data to the device named. Only Paletted RGBA PNG images are supported.
 func WriteImage(device string, data []byte) error {
 	// get screen dimensions, bit depth, text cell size, framebuffer padding
-	// winsize := term.GetWinsize()
-	// cellwidth := winsize.Xres / winsize.Cols
-	// cellheight := winsize.Yres / winsize.Rows
-	scrinfo, err := term.QueryFramebuffer(device)
+	winsize := term.GetWinsize()
+	cellheight := int(winsize.Yres / winsize.Rows)
+	_, crsry, err := term.GetCursorCoord()
+	if err != nil {
+		return err
+	}
+	scrinfo, err := Query(device)
 	if err != nil {
 		return err
 	}
@@ -50,7 +61,7 @@ func WriteImage(device string, data []byte) error {
 	}
 	if img, ok := img.(*image.Paletted); ok {
 		n := 0
-		pix := (*[1 << 24]C.char)(unsafe.Pointer(cimg.pix))
+		pix := (*[1 << 24]C.char)(unsafe.Pointer(&cimg.pix))
 		for _, indx := range img.Pix {
 			if rgba, ok := img.Palette[indx].(color.RGBA); ok {
 				pix[n+0] = (C.char)(rgba.B)
@@ -72,7 +83,7 @@ func WriteImage(device string, data []byte) error {
 		pad:    C.int(pad),
 		device: C.CString(device),
 	}
-	if C.write_image(cimg, 0, 0, &fbinfo) != 0 {
+	if C.write_image(cimg, 0, C.int(crsry * cellheight), &fbinfo) != 0 {
 		return fmt.Errorf("%s: write to framebuffer failed", device)
 	}
 	return nil
