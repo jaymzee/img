@@ -5,12 +5,9 @@ package term
 // #cgo CFLAGS:
 // #cgo LDFLAGS:
 // #include <unistd.h>
+// #include "cursor.h"
 import "C"
-import (
-	"fmt"
-	"os"
-	"regexp"
-)
+import "fmt"
 
 func TtyName() string {
 	return C.GoString(C.ttyname(C.STDIN_FILENO))
