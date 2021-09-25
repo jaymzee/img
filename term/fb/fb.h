@@ -15,3 +15,4 @@ struct image {
 
 int write_image(struct image *img, int x, int y, struct fbinfo *fbinfo);
 struct image *new_image(int xres, int yres);
+void destroy_image(struct image *img);

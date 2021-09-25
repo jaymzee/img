@@ -2,6 +2,7 @@ package fb
 
 // #cgo CFLAGS:
 // #cgo LDFLAGS:
+// #include <stdlib.h>
 // #include "fb.h"
 import "C"
 
@@ -30,20 +31,19 @@ func WriteImage(device string, data []byte) error {
 	winsize := term.GetWinsize()
 	cellwidth := int(winsize.Xres / winsize.Cols)
 	cellheight := int(winsize.Yres / winsize.Rows)
-	_, cur_y, err := term.GetCursorCoord()
-	if err != nil {
-		return err
-	}
+	crsr_x, _, err := term.GetCursorCoord()
 	scrinfo, err := Query(device)
 	if err != nil {
 		return err
 	}
 	if scrinfo.Bpp != 32 {
-		return fmt.Errorf("%s: display must be 32 bits per pixel, got %v", device, scrinfo)
+		return fmt.Errorf("%s: display must be 32 bits per pixel, got %v",
+			device, scrinfo)
 	}
 	var pad int = int(scrinfo.Xresv) - int(scrinfo.Xres)
 	if pad < 0 {
-		return fmt.Errorf("%s: xres_virtual less than xres, got %v", device, scrinfo)
+		return fmt.Errorf("%s: xres_virtual less than xres, got %v",
+			device, scrinfo)
 	}
 
 	// decode PNG data
@@ -60,6 +60,7 @@ func WriteImage(device string, data []byte) error {
 	if cimg == nil {
 		return fmt.Errorf("cgo memory allocation failed")
 	}
+	defer C.destroy_image(cimg)
 	if img, ok := img.(*image.Paletted); ok {
 		n := 0
 		pix := (*[1 << 24]C.char)(unsafe.Pointer(&cimg.pix))
@@ -84,10 +85,16 @@ func WriteImage(device string, data []byte) error {
 		pad:    C.int(pad),
 		device: C.CString(device),
 	}
-	for i := 0; i < dy / cellheight + 1; i++ {
+	lines := dy / cellheight + 1
+	for i := 0; i < lines; i++ {
 		fmt.Println();
 	}
-	if C.write_image(cimg, C.int(6 * cellwidth), C.int(cur_y * cellheight), &fbinfo) != 0 {
+	_, crsr_y, err := term.GetCursorCoord()
+	if err != nil {
+		return err
+	}
+	x, y := C.int(crsr_x * cellwidth), C.int((crsr_y-lines) * cellheight)
+	if C.write_image(cimg, x, y, &fbinfo) != 0 {
 		return fmt.Errorf("%s: write to framebuffer failed", device)
 	}
 	return nil
