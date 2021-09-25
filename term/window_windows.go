@@ -12,7 +12,9 @@ func GetWinsize() *Winsize {
 	}
 	err = windows.GetConsoleScreenBufferInfo(h, &csbi)
 	if err != nil {
-		panic(err)
+		// handle invalid in mintty
+		//panic(err)
+		return &Winsize{80, 24, 0, 0}
 	}
 	cols := csbi.Window.Right - csbi.Window.Left + 1
 	rows := csbi.Window.Bottom - csbi.Window.Top + 1

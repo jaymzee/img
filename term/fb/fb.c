@@ -1,3 +1,5 @@
+// +build !windows
+
 #include <fcntl.h>
 #include <stdlib.h>
 #include <stdint.h>

@@ -2,10 +2,9 @@ package term
 
 // #cgo CFLAGS:
 // #cgo LDFLAGS:
-// #include "cursor.h"
+// #include "noop.h"
 import "C"
 import (
-	"fmt"
 	"os"
 	"regexp"
 )
@@ -20,14 +19,4 @@ func Isatty() bool {
 func Isaconsole() bool {
 	pattern := regexp.MustCompile(`/dev/tty\d`)
 	return pattern.MatchString(TtyName())
-}
-
-// GetCursorCood queries the terminal for it's current position on screen
-func GetCursorCoord() (int, int, error) {
-	var x, y C.int
-
-	if C.getCursor(&x, &y) != 0 {
-		return 0, 0, fmt.Errorf("failed to read cursor location")
-	}
-	return int(x), int(y), nil
 }

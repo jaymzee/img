@@ -1,3 +1,5 @@
+// +build !windows
+
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <stdlib.h>
