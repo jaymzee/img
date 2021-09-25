@@ -85,7 +85,7 @@ func WriteImage(device string, data []byte) error {
 		pad:    C.int(pad),
 		device: C.CString(device),
 	}
-	lines := dy / cellheight + 1
+	lines := dy / cellheight + 2
 	for i := 0; i < lines; i++ {
 		fmt.Println();
 	}

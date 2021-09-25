@@ -80,6 +80,16 @@ resize images with:
 convert frog.png -resize 64x64 frog_sm.png
 ```
 
+reduce color palette with:
+```
+convert frog.png -colors 16 frog_16.png
+```
+
+reduce depth of color space with:
+```
+convert frog.png -depth 4 frog_d4.png
+```
+
 convert to Netpbm graymap ascii (magic P2)
 ```
 convert frog.png -compress none frog.pgm
